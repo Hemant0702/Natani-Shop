@@ -1,0 +1,28 @@
+# Smart Pre-Order Web App Tasks
+
+- [x] 1. **Supabase Database & Schema**
+  - [x] Apply database migrations to the `MeriDukan` project (Variants, Khata updates, Store Config).
+  - [x] Set up basic RLS policies.
+- [x] 2. **Backend Setup (Render)**
+  - [x] Extract `server.ts` into a standalone Express backend structure (`server/index.ts`).
+  - [x] Create `render.yaml` for Render deployment.
+  - [x] Update `package.json` with separate build scripts.
+- [x] 3. **Frontend Setup (Vercel)**
+  - [x] Update `vite.config.ts` to cleanly serve the frontend.
+  - [x] Configure `vercel.json` or ensure Vite output is correctly targeted for Vercel.
+- [x] 4. **Authentication Flow**
+  - [x] Refactor `AuthView.tsx` to use Username (Email) and Password.
+  - [x] Remove all OTP logic.
+- [x] 5. **UI & Features (Customer App)**
+  - [x] Improve global UI aesthetics (Tailwind colors, glassmorphism, animations).
+  - [x] Update `CatalogView.tsx` with variant selection and minimum order logic.
+  - [x] Update `CartView.tsx` to handle minimum orders and store open/closed states.
+  - [x] Update `OrdersView.tsx` and `KhataView.tsx` (Credit limit, disputes).
+- [x] 6. **UI & Features (Owner Dashboard)**
+  - [x] Add Store Open/Closed toggle and custom message.
+  - [x] Add Customer Label assignment (Trusted, Normal, Careful).
+  - [x] Add Khata credit limit controls.
+- [x] 7. **Verification**
+  - [x] Run typescript checks.
+  - [x] Test the username/password auth flow.
+  - [x] Test ordering and owner dashboard functionality.
