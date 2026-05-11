@@ -1,4 +1,4 @@
-export type UserRole = 'users' | 'admin';
+export type UserRole = 'customer' | 'admin';
 export type TrustLabel = 'trusted' | 'normal' | 'careful';
 export type AvailabilityStatus = 'Available Today' | 'Running Low' | 'Out of Stock';
 export type OrderStatus = 'Placed' | 'Accepted' | 'Packing' | 'Packed' | 'Picked' | 'Cancelled';

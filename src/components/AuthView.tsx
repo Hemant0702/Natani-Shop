@@ -62,7 +62,7 @@ export function AuthView() {
         phoneNumber: phone,
         email: email,
         place,
-        role: (phone === '9999999999' || email === 'apnidukan@gmail.com') ? 'admin' : 'users' as UserRole,
+        role: (phone === '9999999999' || email === 'apnidukan@gmail.com') ? 'admin' : 'customer' as UserRole,
         trustLabel: 'normal' as const,
         creditLimit: 500,
         balance: 0,

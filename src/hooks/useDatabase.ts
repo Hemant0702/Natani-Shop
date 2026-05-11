@@ -54,11 +54,7 @@ export const useDatabase = () => {
   };
 
   const createUserProfile = async (profile: UserProfile) => {
-    try {
-      await api.post('/api/auth/register-profile', profile);
-    } catch (error) {
-      console.error('Error creating profile:', error);
-    }
+    return await api.post('/api/auth/register-profile', profile);
   };
 
   // Orders
