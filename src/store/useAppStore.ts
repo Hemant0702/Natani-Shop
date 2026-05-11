@@ -36,10 +36,10 @@ export const useAppStore = create<AppState>()(
           item => item.productId === product.id && item.variantLabel === variantLabel
         );
 
-        let price = 0;
+        let price = product.price || 0;
         if (variantLabel && product.variants) {
-          price = product.variants.find(v => v.label === variantLabel)?.price || 0;
-        } else if (product.variants && product.variants.length > 0) {
+          price = product.variants.find(v => v.label === variantLabel)?.price || price;
+        } else if (product.variants && product.variants.length > 0 && !variantLabel) {
           price = product.variants[0].price;
         }
 

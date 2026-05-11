@@ -6,7 +6,7 @@ CREATE TABLE config (
   id TEXT PRIMARY KEY,
   isOpen BOOLEAN DEFAULT true,
   minOrderValue INTEGER DEFAULT 50,
-  storeInfo JSONB DEFAULT '{"name": "Apni Dukaan", "ownerName": "Hemant Natani", "location": "Village Near Kota", "phone": "9999999999"}'::jsonb
+  storeInfo JSONB DEFAULT '{"name": "Apni Dukan", "ownerName": "Hemant Natani", "location": "Village Near Kota", "phone": "9999999999"}'::jsonb
 );
 
 INSERT INTO config (id, isOpen, minOrderValue) VALUES ('main', true, 50);
@@ -30,7 +30,7 @@ CREATE TABLE users (
   fullName TEXT NOT NULL,
   phoneNumber TEXT,
   place TEXT,
-  role TEXT DEFAULT 'customer',
+  role TEXT DEFAULT 'users',
   trustLabel TEXT DEFAULT 'normal',
   creditLimit INTEGER DEFAULT 500,
   balance INTEGER DEFAULT 0,

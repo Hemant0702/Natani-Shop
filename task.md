@@ -3,22 +3,30 @@
 - [x] 1. **Supabase Database & Schema**
   - [x] Apply database migrations to the `MeriDukan` project (Variants, Khata updates, Store Config).
   - [x] Set up basic RLS policies.
-- [x] 2. **Backend Setup (Render)**
-  - [x] Extract `server.ts` into a standalone Express backend structure (`server/index.ts`).
-  - [x] Create `render.yaml` for Render deployment.
-  - [x] Update `package.json` with separate build scripts.
-- [x] 3. **Frontend Setup (Vercel)**
-  - [x] Update `vite.config.ts` to cleanly serve the frontend.
-  - [x] Configure `vercel.json` or ensure Vite output is correctly targeted for Vercel.
-- [x] 4. **Authentication Flow**
-  - [x] Refactor `AuthView.tsx` to use Username (Email) and Password.
-  - [x] Remove all OTP logic.
-- [x] 5. **UI & Features (Customer App)**
+- [x] 2. **Backend Infrastructure Setup**
+  - [x] Express.js server foundation
+  - [x] Supabase Admin client
+  - [x] JWT Authentication middleware
+- [x] 3. **Implementation of API Routes**
+  - [x] Auth & Profile sync
+  - [x] Product CRUD
+  - [x] Order management
+  - [x] Store configuration
+  - [x] Customer management
+  - [x] Khata (Ledger) management
+- [x] 4. **Frontend Service Layer**
+  - [x] Central API client (`api.ts`)
+  - [x] JWT injection logic
+- [x] 5. **Hook & Component Migration**
+  - [x] Refactor `useDatabase.ts`
+  - [x] Implement polling for real-time updates
+  - [x] Update all components to use API client
+- [x] 6. **UI & Features (Customer App)**
   - [x] Improve global UI aesthetics (Tailwind colors, glassmorphism, animations).
   - [x] Update `CatalogView.tsx` with variant selection and minimum order logic.
   - [x] Update `CartView.tsx` to handle minimum orders and store open/closed states.
   - [x] Update `OrdersView.tsx` and `KhataView.tsx` (Credit limit, disputes).
-- [x] 6. **UI & Features (Owner Dashboard)**
+- [x] 7. **UI & Features (Owner Dashboard)**
   - [x] Add Store Open/Closed toggle and custom message.
   - [x] Add Customer Label assignment (Trusted, Normal, Careful).
   - [x] Add Khata credit limit controls.

@@ -1,24 +1,40 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth';
+import productRoutes from './routes/products';
+import orderRoutes from './routes/orders';
+import configRoutes from './routes/config';
+import customerRoutes from './routes/customers';
+import khataRoutes from './routes/khata';
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+const app = express();
+const port = process.env.PORT || 3000;
 
-  app.use(cors());
-  app.use(express.json());
+// CORS configuration
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+app.use(cors({
+  origin: [frontendUrl, 'http://localhost:5173'],
+  credentials: true
+}));
 
-  // API Routes
-  app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", message: "Render Backend is running" });
-  });
+app.use(express.json());
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running at http://0.0.0.0:${PORT}`);
-  });
-}
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/config', configRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/khata', khataRoutes);
 
-startServer();
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});

@@ -1,9 +1,19 @@
 services:
   - type: web
-    name: hone-dukaan-api
+    name: apni-dukan-api
     env: node
     buildCommand: npm install
-    startCommand: npx tsx server/index.ts
+    startCommand: npm run start:backend
     envVars:
       - key: NODE_VERSION
         value: 20
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-vercel-app.vercel.app

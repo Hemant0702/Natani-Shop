@@ -13,8 +13,8 @@ export default defineConfig(({mode}) => {
       VitePWA({
         registerType: 'autoUpdate',
         manifest: {
-          name: 'Hone Dukaan',
-          short_name: 'Dukaan',
+          name: 'Apni Dukan',
+          short_name: 'Dukan',
           description: 'Digital pre-order app for village retail',
           theme_color: '#ea580c',
           icons: [

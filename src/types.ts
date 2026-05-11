@@ -1,8 +1,10 @@
-export type UserRole = 'customer' | 'owner';
+export type UserRole = 'users' | 'admin';
 export type TrustLabel = 'trusted' | 'normal' | 'careful';
 export type AvailabilityStatus = 'Available Today' | 'Running Low' | 'Out of Stock';
-export type OrderStatus = 'Placed' | 'Being Packed' | 'Ready for Pickup' | 'Completed' | 'Cancelled';
+export type OrderStatus = 'Placed' | 'Accepted' | 'Packing' | 'Packed' | 'Picked' | 'Cancelled';
+export type PaymentStatus = 'pending' | 'collected';
 export type KhataType = 'Order' | 'Payment' | 'Adjustment';
+export type ProductUnit = 'kg' | 'litre' | 'packet' | 'piece';
 
 export interface ProductVariant {
   label: string;
@@ -17,15 +19,21 @@ export interface Product {
   searchKeywords?: string[];
   category: string;
   price: number;
-  unit: 'kg' | 'litre' | 'packet' | 'piece';
+  unit: ProductUnit;
   variants?: ProductVariant[];
   availabilityStatus: AvailabilityStatus;
+  description?: string;
+  image?: string;
+  discountPercent?: number;
+  discountFlat?: number;
+  isFeatured?: boolean;
 }
 
 export interface UserProfile {
   uid: string;
   fullName: string;
   phoneNumber: string;
+  email: string;
   place: string;
   role: UserRole;
   trustLabel: TrustLabel;
@@ -50,6 +58,7 @@ export interface Order {
   items: OrderItem[];
   total: number;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
   pickupSlot: string;
   ownerNote?: string;
   customerResponse?: 'OK' | 'Cancel Item';

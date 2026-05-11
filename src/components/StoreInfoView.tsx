@@ -14,9 +14,9 @@ export function StoreInfoView() {
   };
 
   const handleShare = async () => {
-    const text = `Hone Dukaan par order karein! ${window.location.origin}`;
+    const text = `Apni Dukan par order karein! ${window.location.origin}`;
     if (navigator.share) {
-      await navigator.share({ title: 'Hone Dukaan', text, url: window.location.origin });
+      await navigator.share({ title: 'Apni Dukan', text, url: window.location.origin });
     } else {
       await navigator.clipboard.writeText(text);
       alert('Link copy ho gaya! WhatsApp par bhej dein.');

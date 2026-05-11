@@ -3,8 +3,23 @@
 
 @theme {
   --font-sans: "Inter", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-brand-primary: #06833E;
+  --color-brand-secondary: #008037;
+  --color-brand-light: #E6F3EC;
+  --color-bg-main: #F7F9FB;
 }
 
 :root {
   font-family: var(--font-sans);
+  background-color: var(--color-bg-main);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
