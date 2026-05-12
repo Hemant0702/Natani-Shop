@@ -13,7 +13,17 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      # ✅ Changed from generateValue — a new secret every restart logs everyone out
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: FRONTEND_URL
-        value: https://your-vercel-app.vercel.app
+        value: https://natani-shop.vercel.app   # ← replace with your real URL
+      # ✅ New — required for web-push to work in production
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:you@example.com
