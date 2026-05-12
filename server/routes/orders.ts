@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
 import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth';
+import { broadcastToAdmins, sendPushNotification } from './push';
 
 const router = Router();
 
@@ -21,6 +22,14 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
       .single();
 
     if (error) throw error;
+
+    // Notify admins
+    broadcastToAdmins({
+      title: 'New Order Received! 🛍️',
+      body: `A customer placed an order for ₹${orderData.total}.`,
+      url: '/admin/orders'
+    });
+
     res.json(data);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -70,6 +79,14 @@ router.put('/:id/status', authMiddleware, adminMiddleware, async (req: AuthReque
       .single();
 
     if (error) throw error;
+
+    // Notify customer
+    sendPushNotification(data.userId, {
+      title: 'Order Status Updated',
+      body: `Your order is now: ${status}`,
+      url: '/orders'
+    });
+
     res.json(data);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -88,6 +105,15 @@ router.put('/:id/owner-note', authMiddleware, adminMiddleware, async (req: AuthR
       .single();
 
     if (error) throw error;
+
+    if (ownerNote) {
+      sendPushNotification(data.userId, {
+        title: 'Note from Shop Owner',
+        body: `Regarding your order: ${ownerNote}`,
+        url: '/orders'
+      });
+    }
+
     res.json(data);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

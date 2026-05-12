@@ -32,6 +32,8 @@ app.use(cors({
 
 app.use(express.json());
 
+import pushRoutes from './routes/push';
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -39,6 +41,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/khata', khataRoutes);
+app.use('/api/push', pushRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

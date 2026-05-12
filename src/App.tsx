@@ -18,12 +18,16 @@ import { UserProfile } from './types';
 import { Loader2, Bell, X, LogOut, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, formatCurrency } from './lib/utils';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 export default function App() {
   const { user, setAuth, setStoreConfig, isLoading, setLoading } = useAppStore();
   const { getUserProfile, subscribeToStoreConfig } = useDatabase();
   const [activeTab, setActiveTab] = useState('catalog');
   const [showProfile, setShowProfile] = useState(false);
+
+  // Subscribe to push notifications if logged in
+  usePushNotifications(user?.uid);
 
   useEffect(() => {
     // Listen for auth changes

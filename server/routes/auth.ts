@@ -23,7 +23,7 @@ router.get('/profile', authMiddleware, async (req: AuthRequest, res: Response) =
 // Register user profile after Supabase Auth signup
 router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { fullName, phoneNumber, place, role } = req.body;
+    const { fullName, phoneNumber, email, place, role, creditLimit, balance, lastActive } = req.body;
     
     const { data, error } = await supabaseAdmin
       .from('users')
@@ -31,9 +31,13 @@ router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: R
         uid: req.user?.id,
         fullName,
         phoneNumber,
+        email,
         place,
         role: role || 'customer',
         trustLabel: 'normal',
+        creditLimit: creditLimit || 500,
+        balance: balance || 0,
+        lastActive: lastActive || new Date().toISOString(),
         updatedAt: new Date().toISOString()
       })
       .select()

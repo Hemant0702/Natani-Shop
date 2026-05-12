@@ -11,12 +11,18 @@ export default defineConfig(({mode}) => {
       react(), 
       tailwindcss(),
       VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.js',
         registerType: 'autoUpdate',
         manifest: {
           name: 'Apni Dukan',
           short_name: 'Dukan',
           description: 'Digital pre-order app for village retail',
-          theme_color: '#ea580c',
+          theme_color: '#06833E',
+          background_color: '#F7F9FB',
+          display: 'standalone',
+          start_url: '/',
           icons: [
             {
               src: 'pwa-192x192.png',
