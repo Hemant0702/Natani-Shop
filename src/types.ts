@@ -40,6 +40,7 @@ export interface UserProfile {
   creditLimit: number;
   balance: number;
   lastActive: string;
+  updatedAt: string;
 }
 
 export interface OrderItem {
@@ -62,6 +63,7 @@ export interface Order {
   pickupSlot: string;
   ownerNote?: string;
   customerResponse?: 'OK' | 'Cancel Item';
+  pickedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -74,6 +76,8 @@ export interface KhataEntry {
   date: string;
   note?: string;
   isDisputed?: boolean;
+  disputeReason?: string;
+  status?: string;
   orderId?: string;
 }
 
