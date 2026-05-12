@@ -8,6 +8,9 @@ import configRoutes from './routes/config';
 import customerRoutes from './routes/customers';
 import khataRoutes from './routes/khata';
 import rateLimit from 'express-rate-limit';
+import webpush from 'web-push';
+
+
 
 dotenv.config();
 
@@ -58,3 +61,28 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true })
 
 // Stricter limit on order placement
 app.use('/api/orders', rateLimit({ windowMs: 60 * 1000, max: 10 }));
+
+webpush.setVapidDetails(
+  process.env.VAPID_CONTACT_EMAIL!,
+  process.env.VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
+
+// In-memory store (replace with Supabase table for persistence)
+const subscriptions: webpush.PushSubscription[] = [];
+
+// Subscribe endpoint
+app.post('/api/push/subscribe', (req, res) => {
+  const sub = req.body as webpush.PushSubscription;
+  const exists = subscriptions.some(s => s.endpoint === sub.endpoint);
+  if (!exists) subscriptions.push(sub);
+  res.status(201).json({ success: true });
+});
+
+// Send notification helper (call this when an order is placed, etc.)
+export async function sendPushToAll(title: string, body: string, url = '/') {
+  const payload = JSON.stringify({ title, body, url });
+  await Promise.allSettled(
+    subscriptions.map(sub => webpush.sendNotification(sub, payload))
+  );
+}
