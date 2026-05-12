@@ -8,11 +8,49 @@ const router = Router();
 // Place new order
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    const { items, pickupSlot, customerName, customerPhone } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Order items are required' });
+    }
+
+    // Fetch current prices from DB — never trust client total
+    const ids = items.map((i: any) => i.productId);
+    const { data: products, error: productsError } = await supabaseAdmin
+      .from('products')
+      .select('id, price, variants')
+      .in('id', ids);
+
+    if (productsError) throw productsError;
+
+    const priceMap = Object.fromEntries(products.map(p => [p.id, p]));
+
+    let total = 0;
+    for (const item of items) {
+      const product = priceMap[item.productId];
+      if (!product) return res.status(400).json({ error: `Product ${item.productId} not found` });
+      
+      // Calculate item price (considering variants if needed)
+      let itemPrice = product.price;
+      if (item.variantId && product.variants) {
+        const variant = (product.variants as any[]).find(v => v.id === item.variantId);
+        if (variant && variant.price) itemPrice = variant.price;
+      }
+      
+      total += itemPrice * item.quantity;
+    }
+
     const orderData = {
-      ...req.body,
       userId: req.user?.id,
+      customerName: customerName || 'Guest',
+      customerPhone: customerPhone || '',
+      items,
+      total,
+      pickupSlot,
       status: 'Placed',
-      createdAt: new Date().toISOString()
+      paymentStatus: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     const { data, error } = await supabaseAdmin
@@ -26,7 +64,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
     // Notify admins
     broadcastToAdmins({
       title: 'New Order Received! 🛍️',
-      body: `A customer placed an order for ₹${orderData.total}.`,
+      body: `A customer placed an order for ₹${total}.`,
       url: '/admin/orders'
     });
 

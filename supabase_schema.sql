@@ -86,11 +86,40 @@ CREATE TABLE push_subscriptions (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Enable Realtime for all tables
--- Run these commands in Supabase SQL editor if not already enabled
--- ALTER PUBLICATION supabase_realtime ADD TABLE config;
--- ALTER PUBLICATION supabase_realtime ADD TABLE products;
--- ALTER PUBLICATION supabase_realtime ADD TABLE orders;
--- ALTER PUBLICATION supabase_realtime ADD TABLE khata_entries;
--- ALTER PUBLICATION supabase_realtime ADD TABLE users;
--- ALTER PUBLICATION supabase_realtime ADD TABLE push_subscriptions;
+-- Enable RLS on every table
+ALTER TABLE config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE khata_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- config: anyone reads, only admin writes
+CREATE POLICY "config_read" ON config FOR SELECT USING (true);
+CREATE POLICY "config_write" ON config FOR ALL
+  USING ((SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+
+-- products: anyone reads, only admin writes
+CREATE POLICY "products_read" ON products FOR SELECT USING (true);
+CREATE POLICY "products_write" ON products FOR ALL
+  USING ((SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+
+-- orders: customers see only their own, admin sees all
+CREATE POLICY "orders_customer_read" ON orders FOR SELECT
+  USING (auth.uid() = userId OR (SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+CREATE POLICY "orders_customer_insert" ON orders FOR INSERT
+  WITH CHECK (auth.uid() = userId);
+CREATE POLICY "orders_admin_write" ON orders FOR UPDATE
+  USING ((SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+
+-- users: read own row only, admin reads all
+CREATE POLICY "users_self" ON users FOR SELECT
+  USING (auth.uid() = uid OR (SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+CREATE POLICY "users_self_update" ON users FOR UPDATE
+  USING (auth.uid() = uid);
+
+-- khata: customers read own entries, admin reads/writes all
+CREATE POLICY "khata_read" ON khata_entries FOR SELECT
+  USING (auth.uid() = userId OR (SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
+CREATE POLICY "khata_admin_write" ON khata_entries FOR ALL
+  USING ((SELECT role FROM users WHERE uid = auth.uid()) = 'admin');
