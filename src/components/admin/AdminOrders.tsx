@@ -34,7 +34,7 @@ export function AdminOrders() {
     if (filter === 'new') return o.status === 'Placed';
     if (filter === 'active') return ['Accepted', 'Packing', 'Packed'].includes(o.status);
     if (filter === 'completed') return ['Picked', 'Cancelled'].includes(o.status);
-    return matchesSearch;
+    return true;
   });
   
   const handleUpdateStatus = async (id: string, status: string) => {
@@ -237,6 +237,7 @@ function AdminOrderCard({ order, onStatusUpdate, onPick, loading }: {
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-1">
+          {order.status === 'Placed' && (
             <Button loading={loading} onClick={() => onStatusUpdate(order.id, 'Accepted')} className="flex-1 h-10 text-xs font-bold bg-indigo-600 border-none hover:bg-indigo-700">
               ✅ Accept Karo
             </Button>
