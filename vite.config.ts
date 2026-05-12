@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
         },
         manifest: {
           name: 'Apni Dukan',
-          short_name: 'Dukan',
+          short_name: 'Apni Dukan',
           description: 'Digital pre-order app for village retail',
           theme_color: '#06833E',
           background_color: '#F7F9FB',

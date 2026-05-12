@@ -7,19 +7,12 @@ import orderRoutes from './routes/orders';
 import configRoutes from './routes/config';
 import customerRoutes from './routes/customers';
 import khataRoutes from './routes/khata';
-
 import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-// Global: 100 requests per 15 minutes per IP
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true }));
-
-// Stricter limit on order placement
-app.use('/api/orders', rateLimit({ windowMs: 60 * 1000, max: 10 }));
 
 // CORS configuration
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -59,3 +52,9 @@ app.get('/health', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
+// Global: 100 requests per 15 minutes per IP
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true }));
+
+// Stricter limit on order placement
+app.use('/api/orders', rateLimit({ windowMs: 60 * 1000, max: 10 }));
