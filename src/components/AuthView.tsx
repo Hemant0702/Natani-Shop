@@ -67,6 +67,7 @@ export function AuthView() {
         creditLimit: 500,
         balance: 0,
         lastActive: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       await createUserProfile(profile);
@@ -90,10 +91,8 @@ export function AuthView() {
         className="w-full max-w-sm space-y-8 relative z-10"
       >
         <div className="text-center space-y-2">
-          <div className="mx-auto h-20 w-20 bg-white rounded-[2rem] flex items-center justify-center mb-6 shadow-xl shadow-[#06833E]/10 border border-[#06833E]/5">
-            <div className="h-14 w-14 rounded-2xl bg-[#06833E] flex items-center justify-center text-3xl">
-               🏪
-            </div>
+          <div className="mx-auto h-20 w-20 bg-white rounded-[2rem] flex items-center justify-center mb-6 shadow-xl shadow-[#06833E]/10 border border-[#06833E]/5 overflow-hidden">
+            <img src="/pwa-192x192.png" alt="Logo" className="h-full w-full object-cover" />
           </div>
           <h1 className="text-4xl font-black text-[#06833E] tracking-tight">ApniDukan</h1>
           <p className="text-sm font-bold text-gray-400">
