@@ -43,14 +43,24 @@ export function CatalogView() {
 
   const handleAddToCart = (product: Product, variantLabel?: string, customPrice?: number, customWeight?: string) => {
     if (customPrice && customWeight) {
-        // Special case for custom weight/price items
+        // Special case for custom weight/price items (from detail view calculator)
         addToCart({
             ...product,
             price: customPrice,
             name: `${product.name} (${customWeight})`
         });
     } else {
-        addToCart(product, variantLabel);
+        // Direct add or variant add
+        if (!variantLabel) {
+            // No variant selected, add default unit to name if it's a direct add
+            // This ensures "Milk" becomes "Milk (1 litre)"
+            addToCart({
+                ...product,
+                name: product.unit ? `${product.name} (1 ${product.unit})` : product.name
+            });
+        } else {
+            addToCart(product, variantLabel);
+        }
     }
     setSelectedProduct(null);
     setViewingProduct(null);

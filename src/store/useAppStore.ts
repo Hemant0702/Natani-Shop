@@ -7,10 +7,12 @@ interface AppState {
   storeConfig: StoreConfig | null;
   cart: OrderItem[];
   isLoading: boolean;
+  globalLoading: boolean;
   
   setAuth: (user: UserProfile | null) => void;
   setStoreConfig: (config: StoreConfig | null) => void;
   setLoading: (loading: boolean) => void;
+  setGlobalLoading: (loading: boolean) => void;
   
   // Cart Actions
   addToCart: (product: Product, variantLabel?: string, quantity?: number) => void;
@@ -26,10 +28,12 @@ export const useAppStore = create<AppState>()(
       storeConfig: null,
       cart: [],
       isLoading: true,
+      globalLoading: false,
 
       setAuth: (user) => set({ user }),
       setStoreConfig: (config) => set({ storeConfig: config }),
       setLoading: (loading) => set({ isLoading: loading }),
+      setGlobalLoading: (loading) => set({ globalLoading: loading }),
 
       addToCart: (product, variantLabel, quantity = 1) => set((state) => {
         const existingIndex = state.cart.findIndex(

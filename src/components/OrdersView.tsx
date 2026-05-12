@@ -59,7 +59,15 @@ function OrderCard({ order }: { order: Order }) {
   const config = statusConfig[order.status] || statusConfig['Placed'];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <div className={cn(
+      "overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300",
+      order.status === 'Packed' && "bg-[#E6F3EC] border-[#06833E]/30 ring-1 ring-[#06833E]/10",
+      order.status === 'Accepted' && "bg-indigo-50/50 border-indigo-100",
+      order.status === 'Packing' && "bg-orange-50/50 border-orange-100",
+      order.status === 'Picked' && "bg-gray-50 border-gray-100",
+      order.status === 'Cancelled' && "bg-red-50 border-red-100",
+      !['Packed', 'Accepted', 'Packing', 'Picked', 'Cancelled'].includes(order.status) && "border-gray-100"
+    )}>
       {/* Status Banner */}
       <div className={cn("flex items-center justify-between p-3 px-4 border-b", config.bg)}>
         <span className={cn("text-[10px] font-black uppercase tracking-wide", config.color)}>

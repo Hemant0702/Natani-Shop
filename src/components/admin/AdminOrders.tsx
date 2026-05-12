@@ -15,6 +15,7 @@ export function AdminOrders() {
   const [filter, setFilter] = useState<'all' | 'new' | 'active' | 'completed'>('all');
   const { subscribeToAllOrders, updateOrderStatus, markOrderPicked } = useDatabase();
   const [summary, setSummary] = useState({ todaySales: 0, pendingOrders: 0, totalPending: 0 });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     return subscribeToAllOrders((allOrders) => {
@@ -33,15 +34,30 @@ export function AdminOrders() {
     if (filter === 'new') return o.status === 'Placed';
     if (filter === 'active') return ['Accepted', 'Packing', 'Packed'].includes(o.status);
     if (filter === 'completed') return ['Picked', 'Cancelled'].includes(o.status);
-    return true;
+    return matchesSearch;
   });
+  
+  const handleUpdateStatus = async (id: string, status: string) => {
+    setLoading(true);
+    try {
+      await updateOrderStatus(id, status);
+    } catch (e) {
+      console.error(e);
+      alert('Error updating status');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePickOrder = async (orderId: string, paymentStatus: 'collected' | 'pending') => {
+    setLoading(true);
     try {
       await markOrderPicked(orderId, paymentStatus);
     } catch (e) {
       console.error(e);
       alert('Error updating order');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,7 +107,8 @@ export function AdminOrders() {
             <div key={order.id}>
               <AdminOrderCard 
                 order={order} 
-                onStatusUpdate={updateOrderStatus}
+                loading={loading}
+                onStatusUpdate={handleUpdateStatus}
                 onPick={handlePickOrder}
               />
             </div>
@@ -102,10 +119,11 @@ export function AdminOrders() {
   );
 }
 
-function AdminOrderCard({ order, onStatusUpdate, onPick }: { 
+function AdminOrderCard({ order, onStatusUpdate, onPick, loading }: { 
   order: Order; 
   onStatusUpdate: (id: string, status: string) => void;
   onPick: (id: string, paymentStatus: 'collected' | 'pending') => void;
+  loading: boolean;
 }) {
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
@@ -125,7 +143,15 @@ function AdminOrderCard({ order, onStatusUpdate, onPick }: {
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
+      className={cn(
+        "overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300",
+        order.status === 'Packed' && "bg-[#E6F3EC] border-[#06833E]/30 ring-1 ring-[#06833E]/10",
+        order.status === 'Accepted' && "bg-indigo-50/50 border-indigo-100",
+        order.status === 'Packing' && "bg-orange-50/50 border-orange-100",
+        order.status === 'Picked' && "bg-gray-50 border-gray-100",
+        order.status === 'Cancelled' && "bg-red-50 border-red-100",
+        !['Packed', 'Accepted', 'Packing', 'Picked', 'Cancelled'].includes(order.status) && "border-gray-100"
+      )}
     >
       {/* Status Header */}
       <div className={cn("flex items-center justify-between px-4 py-2.5 border-b", config.bg)}>
@@ -211,23 +237,22 @@ function AdminOrderCard({ order, onStatusUpdate, onPick }: {
 
         {/* Action Buttons */}
         <div className="flex gap-2 pt-1">
-          {order.status === 'Placed' && (
-            <Button onClick={() => onStatusUpdate(order.id, 'Accepted')} className="flex-1 h-10 text-xs font-bold bg-indigo-600 border-none hover:bg-indigo-700">
+            <Button loading={loading} onClick={() => onStatusUpdate(order.id, 'Accepted')} className="flex-1 h-10 text-xs font-bold bg-indigo-600 border-none hover:bg-indigo-700">
               ✅ Accept Karo
             </Button>
           )}
           {order.status === 'Accepted' && (
-            <Button onClick={() => onStatusUpdate(order.id, 'Packing')} className="flex-1 h-10 text-xs font-bold bg-orange-500 border-none hover:bg-orange-600">
+            <Button loading={loading} onClick={() => onStatusUpdate(order.id, 'Packing')} className="flex-1 h-10 text-xs font-bold bg-orange-500 border-none hover:bg-orange-600">
               📦 Pack Karo
             </Button>
           )}
           {order.status === 'Packing' && (
-            <Button onClick={() => onStatusUpdate(order.id, 'Packed')} className="flex-1 h-10 text-xs font-bold bg-emerald-600 border-none hover:bg-emerald-700">
+            <Button loading={loading} onClick={() => onStatusUpdate(order.id, 'Packed')} className="flex-1 h-10 text-xs font-bold bg-emerald-600 border-none hover:bg-emerald-700">
               ✅ Packed!
             </Button>
           )}
           {order.status === 'Packed' && !showPaymentOptions && (
-            <Button onClick={() => setShowPaymentOptions(true)} className="flex-1 h-10 text-xs font-bold bg-gray-900 border-none hover:bg-black">
+            <Button loading={loading} onClick={() => setShowPaymentOptions(true)} className="flex-1 h-10 text-xs font-bold bg-gray-900 border-none hover:bg-black">
               🤝 Picked — Payment?
             </Button>
           )}
@@ -236,12 +261,14 @@ function AdminOrderCard({ order, onStatusUpdate, onPick }: {
           {order.status === 'Packed' && showPaymentOptions && (
             <div className="flex gap-2 w-full">
               <Button 
+                loading={loading}
                 onClick={() => onPick(order.id, 'collected')} 
                 className="flex-1 h-10 text-xs font-bold bg-green-600 border-none hover:bg-green-700"
               >
                 💰 Paisa Liya
               </Button>
               <Button 
+                loading={loading}
                 onClick={() => onPick(order.id, 'pending')} 
                 className="flex-1 h-10 text-xs font-bold bg-red-500 border-none hover:bg-red-600"
               >

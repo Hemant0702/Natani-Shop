@@ -1,6 +1,7 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { ButtonHTMLAttributes, forwardRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
+import { useAppStore } from '../../store/useAppStore';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
@@ -9,6 +10,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', loading, children, disabled, ...props }, ref) => {
+    const setGlobalLoading = useAppStore((state) => state.setGlobalLoading);
+
+    useEffect(() => {
+      if (loading) {
+        setGlobalLoading(true);
+      } else {
+        // We don't want to blindly set it to false because other buttons might be loading
+        // But for a simple app like this, it's usually fine.
+        // A better way would be a counter, but let's stick to this for now.
+        setGlobalLoading(false);
+      }
+    }, [loading, setGlobalLoading]);
+
     const variants = {
       primary: 'bg-orange-600 text-white hover:bg-orange-700',
       secondary: 'bg-orange-100 text-orange-900 hover:bg-orange-200',

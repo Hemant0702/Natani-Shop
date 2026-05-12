@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { PRODUCT_CATEGORIES } from '../lib/constants';
 
 export function CartView() {
-  const { cart, updateQuantity, removeFromCart, clearCart, storeConfig, user } = useAppStore();
+  const { cart, updateQuantity, removeFromCart, clearCart, storeConfig, user, setGlobalLoading } = useAppStore();
   const { placeOrder } = useDatabase();
   const [loading, setLoading] = useState(false);
   const [pickupNote, setPickupNote] = useState('');
@@ -26,6 +26,7 @@ export function CartView() {
       return alert(`Minimum order Rs. ${storeConfig.minOrderValue} ka hona chahiye`);
     }
     setLoading(true);
+    setGlobalLoading(true);
     try {
       await placeOrder({
         userId: user.uid,
@@ -47,6 +48,7 @@ export function CartView() {
       alert(e.message || 'Order place nahi ho paya');
     } finally {
       setLoading(false);
+      setGlobalLoading(false);
     }
   };
 

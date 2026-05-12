@@ -14,6 +14,7 @@ import { CatalogView } from './components/CatalogView';
 import { CartView } from './components/CartView';
 import { OrdersView } from './components/OrdersView';
 import { KhataView } from './components/KhataView';
+import { LoadingOverlay } from './components/ui/LoadingOverlay';
 import { UserProfile } from './types';
 import { Loader2, Bell, X, LogOut, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -205,6 +206,8 @@ export default function App() {
           </>
         )}
       </AnimatePresence>
+      
+      <LoadingOverlay />
     </div>
   );
 }
