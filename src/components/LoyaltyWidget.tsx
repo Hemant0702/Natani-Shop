@@ -34,7 +34,6 @@ export function LoyaltyWidget() {
           <span className="text-[11px] font-black text-orange-600">🔥{streak.currentStreak}</span>
         )}
         <span className="text-[11px] font-black text-amber-700">🪙{coinBalance}</span>
-        <span className="text-[11px] font-black text-purple-600">✨{loyaltyStatus.rewardPoints}</span>
         {highestBadge && (
           <span className="text-[11px]">{highestBadge.emoji}</span>
         )}
