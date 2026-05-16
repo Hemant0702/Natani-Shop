@@ -22,9 +22,21 @@ router.get('/', async (req: Request, res: Response) => {
 // Admin: Create product
 router.post('/', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
+    const {
+      name, category, price, unit, description, image, availabilityStatus,
+      variants, discountPercent, discountFlat, isFeatured, hindiName,
+      englishAliases, searchKeywords, image_url, image_path
+    } = req.body;
+
+    const newProduct = {
+      name, category, price, unit, description, image, availabilityStatus,
+      variants, discountPercent, discountFlat, isFeatured, hindiName,
+      englishAliases, searchKeywords, image_url, image_path
+    };
+
     const { data, error } = await supabaseAdmin
       .from('products')
-      .insert([req.body])
+      .insert([newProduct])
       .select()
       .single();
 
@@ -38,9 +50,24 @@ router.post('/', authMiddleware, adminMiddleware, async (req: Request, res: Resp
 // Admin: Update product
 router.put('/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
+    const {
+      name, category, price, unit, description, image, availabilityStatus,
+      variants, discountPercent, discountFlat, isFeatured, hindiName,
+      englishAliases, searchKeywords, image_url, image_path
+    } = req.body;
+
+    const updateProduct = {
+      name, category, price, unit, description, image, availabilityStatus,
+      variants, discountPercent, discountFlat, isFeatured, hindiName,
+      englishAliases, searchKeywords, image_url, image_path
+    };
+
+    // Remove undefined fields
+    Object.keys(updateProduct).forEach(key => updateProduct[key as keyof typeof updateProduct] === undefined && delete updateProduct[key as keyof typeof updateProduct]);
+
     const { data, error } = await supabaseAdmin
       .from('products')
-      .update(req.body)
+      .update(updateProduct)
       .eq('id', req.params.id)
       .select()
       .single();

@@ -272,14 +272,44 @@ router.get('/all', authMiddleware, adminMiddleware, async (req: AuthRequest, res
 router.put('/:id/status', authMiddleware, adminMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { status } = req.body;
+
+    const VALID_STATUSES = ['Placed', 'Confirmed', 'Packing', 'Packed', 'Dispatched', 'Delivered', 'Cancelled', 'Picked'];
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const { data: currentOrder, error: fetchError } = await supabaseAdmin
+      .from('orders')
+      .select('status')
+      .eq('id', req.params.id)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (!currentOrder) return res.status(404).json({ error: 'Order not found' });
+
+    // Validate transition (simplified state machine)
+    const allowedTransitions: Record<string, string[]> = {
+      'Placed': ['Confirmed', 'Cancelled'],
+      'Confirmed': ['Packing', 'Cancelled'],
+      'Packing': ['Packed'],
+      'Packed': ['Dispatched', 'Picked'],
+      'Dispatched': ['Delivered'],
+      // Terminal states
+      'Delivered': [],
+      'Cancelled': [],
+      'Picked': []
+    };
+
+    if (currentOrder.status !== status && !allowedTransitions[currentOrder.status]?.includes(status)) {
+      return res.status(400).json({ error: `Invalid transition from ${currentOrder.status} to ${status}` });
+    }
+
     const { data, error } = await supabaseAdmin
       .from('orders')
       .update({ status })
       .eq('id', req.params.id)
       .select()
       .single();
-
-    if (error) throw error;
 
     if (error) throw error;
 

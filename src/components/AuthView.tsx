@@ -69,6 +69,7 @@ export function AuthView() {
         trustLabel: 'normal' as const,
         creditLimit: 500,
         balance: 0,
+        rewardPoints: 0,
         lastActive: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         appliedReferralCode: appliedReferral || undefined,

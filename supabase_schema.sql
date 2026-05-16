@@ -7,7 +7,7 @@ CREATE TABLE config (
   isOpen BOOLEAN DEFAULT true,
   minOrderValue INTEGER DEFAULT 50,
   reopenMessage TEXT,
-  storeInfo JSONB DEFAULT '{"name": "Hone Dukaan", "phone": "9999999999", "location": "Village Near Kota", "ownerName": "Hemant Natani"}'::jsonb
+  storeInfo JSONB DEFAULT '{"name": "Local Shop", "phone": "0000000000", "location": "Your City", "ownerName": "Shop Owner"}'::jsonb
 );
 
 INSERT INTO config (id, isOpen, minOrderValue) VALUES ('main', true, 50);

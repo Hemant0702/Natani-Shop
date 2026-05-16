@@ -24,7 +24,7 @@ router.get('/profile', authMiddleware, async (req: AuthRequest, res: Response) =
 // Register user profile after Supabase Auth signup
 router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { fullName, phoneNumber, email, place, role, creditLimit, balance, lastActive, appliedReferralCode } = req.body;
+    const { fullName, phoneNumber, email, place, lastActive, appliedReferralCode } = req.body;
     
     // Generate unique referral code for new users
     const referralCode = await generateUniqueReferralCode();
@@ -49,10 +49,10 @@ router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: R
         phoneNumber,
         email,
         place,
-        role: role || 'customer',
+        role: 'customer',
         trustLabel: 'normal',
-        creditLimit: creditLimit || 500,
-        balance: balance || 0,
+        creditLimit: 500,
+        balance: 0,
         lastActive: lastActive || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         referral_code: referralCode,

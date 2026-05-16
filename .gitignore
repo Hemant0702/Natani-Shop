@@ -7,3 +7,16 @@ coverage/
 .env*
 !.env.example
 firebase-applet-config.json
+
+# Sensitive documentation
+prd.txt
+Village_Retail_PRD_v4.pdf
+Refactor_implementation_plan.md
+implementation_plan.md
+task.md
+metadata.json
+
+# Graphify
+graphify-out/
+.graphify/
+

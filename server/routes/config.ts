@@ -23,9 +23,17 @@ router.get('/', async (req: Request, res: Response) => {
 // Admin: Update store config
 router.put('/', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
+    const { isOpen, minOrderValue, reopenMessage, storeInfo } = req.body;
+    
+    const updateConfig: any = {};
+    if (isOpen !== undefined) updateConfig.isOpen = isOpen;
+    if (minOrderValue !== undefined) updateConfig.minOrderValue = minOrderValue;
+    if (reopenMessage !== undefined) updateConfig.reopenMessage = reopenMessage;
+    if (storeInfo !== undefined) updateConfig.storeInfo = storeInfo;
+
     const { data, error } = await supabaseAdmin
       .from('config')
-      .update(req.body)
+      .update(updateConfig)
       .eq('id', 'main')
       .select()
       .single();

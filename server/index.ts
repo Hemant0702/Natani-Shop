@@ -58,29 +58,12 @@ app.get('/health', (req, res) => {
 });
 
 webpush.setVapidDetails(
-  process.env.VAPID_CONTACT_EMAIL || 'mailto:hemantnatani2002@gmail.com',
+  process.env.VAPID_CONTACT_EMAIL || 'mailto:contact@localshop.com',
   process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY || '',
   process.env.VAPID_PRIVATE_KEY || ''
 );
 
-// In-memory store (replace with Supabase table for persistence)
-const subscriptions: webpush.PushSubscription[] = [];
 
-// Subscribe endpoint
-app.post('/api/push/subscribe', (req, res) => {
-  const sub = req.body as webpush.PushSubscription;
-  const exists = subscriptions.some(s => s.endpoint === sub.endpoint);
-  if (!exists) subscriptions.push(sub);
-  res.status(201).json({ success: true });
-});
-
-// Send notification helper
-export async function sendPushToAll(title: string, body: string, url = '/') {
-  const payload = JSON.stringify({ title, body, url });
-  await Promise.allSettled(
-    subscriptions.map(sub => webpush.sendNotification(sub, payload))
-  );
-}
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

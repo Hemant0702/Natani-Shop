@@ -28,9 +28,22 @@ router.get('/:userId', authMiddleware, async (req: AuthRequest, res: Response) =
 // Admin: Add khata entry
 router.post('/', authMiddleware, adminMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    const { userId, type, amount, note, orderId, date } = req.body;
+    
+    const newEntry = {
+      userId,
+      type,
+      amount,
+      note,
+      orderId,
+      date: date || new Date().toISOString(),
+      status: 'pending',
+      isDisputed: false
+    };
+
     const { data, error } = await supabaseAdmin
       .from('khata_entries')
-      .insert([req.body])
+      .insert([newEntry])
       .select()
       .single();
 

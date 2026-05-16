@@ -19,6 +19,10 @@ router.get('/', authMiddleware, adminMiddleware, async (req: AuthRequest, res: R
 router.put('/:uid/trust-label', authMiddleware, adminMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { trustLabel } = req.body;
+    const VALID_LABELS = ['trusted', 'normal', 'careful'];
+    if (!VALID_LABELS.includes(trustLabel)) {
+      return res.status(400).json({ error: 'Invalid trust label' });
+    }
     const { data, error } = await supabaseAdmin
       .from('users')
       .update({ trustLabel })
@@ -37,6 +41,9 @@ router.put('/:uid/trust-label', authMiddleware, adminMiddleware, async (req: Aut
 router.put('/:uid/credit-limit', authMiddleware, adminMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { creditLimit } = req.body;
+    if (typeof creditLimit !== 'number' || creditLimit < 0 || creditLimit > 100000) {
+      return res.status(400).json({ error: 'Invalid credit limit' });
+    }
     const { data, error } = await supabaseAdmin
       .from('users')
       .update({ creditLimit })
