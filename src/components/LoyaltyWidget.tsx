@@ -20,24 +20,29 @@ export function LoyaltyWidget() {
     return () => clearInterval(interval);
   }, [user]);
 
-  if (!loyaltyStatus) return null;
+  // Don't show for admin or when not logged in
+  if (!user || user.role === 'admin') return null;
 
-  const { streak, coinBalance, highestBadge } = loyaltyStatus;
+  const coinBalance = loyaltyStatus?.coinBalance ?? user.rewardPoints ?? 0;
+  const streak = loyaltyStatus?.streak;
+  const highestBadge = loyaltyStatus?.highestBadge;
 
   return (
     <>
-      <button
+      <motion.button
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
         onClick={() => setShowDashboard(true)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100/60 hover:border-amber-200 transition-all active:scale-95"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-100 shadow-sm hover:bg-amber-100 transition-all active:scale-95"
       >
-        {streak.currentStreak > 0 && (
+        {streak && streak.currentStreak > 0 && (
           <span className="text-[11px] font-black text-orange-600">🔥{streak.currentStreak}</span>
         )}
-        <span className="text-[11px] font-black text-amber-700">🪙{coinBalance}</span>
+        <span className="text-xs font-black text-amber-700">🪙 {coinBalance}</span>
         {highestBadge && (
-          <span className="text-[11px]">{highestBadge.emoji}</span>
+          <span className="text-sm">{highestBadge.emoji}</span>
         )}
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {showDashboard && (

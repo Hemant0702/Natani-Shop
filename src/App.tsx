@@ -105,6 +105,8 @@ export default function App() {
         <div className="flex items-center gap-2">
           <LoyaltyWidget />
           <NotificationBell />
+
+
           {/* Profile Circle */}
           <button 
             onClick={() => setShowProfile(true)}
