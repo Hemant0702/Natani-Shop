@@ -93,8 +93,15 @@ function OrderCard({ order }: { order: Order }) {
           {order.items.map((item, idx) => (
             <div key={idx} className="flex justify-between items-center text-sm">
               <div className="flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-white border flex items-center justify-center text-[10px] font-black text-orange-600">{item.quantity}</span>
-                <span className="font-bold text-gray-700">{item.productName} {item.variantLabel ? `(${item.variantLabel})` : ''}</span>
+                {item.image_url ? (
+                  <img src={item.image_url} alt={item.productName} className="h-8 w-8 rounded-lg object-cover border border-gray-200 shadow-sm" />
+                ) : (
+                  <span className="h-6 w-6 rounded-lg bg-white border flex items-center justify-center text-[10px] font-black text-orange-600 shadow-sm">{item.quantity}</span>
+                )}
+                <span className="font-bold text-gray-700">
+                  {item.image_url && <span className="mr-1 text-orange-600 text-[10px]">x{item.quantity}</span>}
+                  {item.productName} {item.variantLabel ? `(${item.variantLabel})` : ''}
+                </span>
               </div>
               <span className="font-black text-gray-900">{formatCurrency(item.price * item.quantity)}</span>
             </div>

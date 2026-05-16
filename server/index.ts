@@ -7,6 +7,8 @@ import orderRoutes from './routes/orders';
 import configRoutes from './routes/config';
 import customerRoutes from './routes/customers';
 import khataRoutes from './routes/khata';
+import loyaltyRoutes from './routes/loyalty';
+import pushRoutes from './routes/push';
 import rateLimit from 'express-rate-limit';
 import webpush from 'web-push';
 
@@ -36,7 +38,9 @@ app.use(cors({
 
 app.use(express.json());
 
-import pushRoutes from './routes/push';
+// Rate limiting
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true }));
+app.use('/api/orders', rateLimit({ windowMs: 60 * 1000, max: 20 }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -45,6 +49,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/khata', khataRoutes);
+app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/push', pushRoutes);
 
 // Health check
@@ -52,20 +57,10 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-
-// Global: 100 requests per 15 minutes per IP
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true }));
-
-// Stricter limit on order placement
-app.use('/api/orders', rateLimit({ windowMs: 60 * 1000, max: 10 }));
-
 webpush.setVapidDetails(
-  process.env.VAPID_CONTACT_EMAIL!,
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
+  process.env.VAPID_CONTACT_EMAIL || 'mailto:hemantnatani2002@gmail.com',
+  process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY || '',
+  process.env.VAPID_PRIVATE_KEY || ''
 );
 
 // In-memory store (replace with Supabase table for persistence)
@@ -79,10 +74,14 @@ app.post('/api/push/subscribe', (req, res) => {
   res.status(201).json({ success: true });
 });
 
-// Send notification helper (call this when an order is placed, etc.)
+// Send notification helper
 export async function sendPushToAll(title: string, body: string, url = '/') {
   const payload = JSON.stringify({ title, body, url });
   await Promise.allSettled(
     subscriptions.map(sub => webpush.sendNotification(sub, payload))
   );
 }
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});

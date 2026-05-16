@@ -1,19 +1,15 @@
 import { Router, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
 import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth';
+import { getEnrichedCustomerList } from '../lib/loyalty';
 
 const router = Router();
 
-// Admin: List all customers
+// Admin: List all customers (enriched with loyalty data)
 router.get('/', authMiddleware, adminMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .order('fullName');
-
-    if (error) throw error;
-    res.json(data);
+    const customers = await getEnrichedCustomerList();
+    res.json(customers);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

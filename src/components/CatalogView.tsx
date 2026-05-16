@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Check, Clock, Heart, Star, SlidersHorizontal, ArrowLeft, Minus } from 'lucide-react';
 import { useDatabase } from '../hooks/useDatabase';
 import { useAppStore } from '../store/useAppStore';
-import { Product, ProductVariant } from '../types';
+import { Product, ProductVariant, FeaturedCustomer } from '../types';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { cn, formatCurrency } from '../lib/utils';
@@ -16,11 +16,16 @@ export function CatalogView() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   
-  const { subscribeToProducts } = useDatabase();
+  const { subscribeToProducts, getFeaturedCustomers: fetchFeatured } = useDatabase();
   const { addToCart, storeConfig, cart, user } = useAppStore();
+  const [featuredCustomers, setFeaturedCustomers] = useState<FeaturedCustomer[]>([]);
 
   useEffect(() => {
     return subscribeToProducts(setProducts);
+  }, []);
+
+  useEffect(() => {
+    fetchFeatured().then(setFeaturedCustomers);
   }, []);
 
   const isSearching = searchQuery.trim().length > 0;
@@ -88,6 +93,21 @@ export function CatalogView() {
           <SlidersHorizontal className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Our Loyal Customers — only when not searching and has featured customers */}
+      {!isSearching && featuredCustomers.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-base font-bold text-gray-900">Hamaare Khaas Grahak 🏆</h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {featuredCustomers.map(fc => (
+              <div key={fc.userId} className="flex-shrink-0 flex items-center gap-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-100 rounded-full px-4 py-2 shadow-sm">
+                <span className="text-lg">{fc.badgeEmoji}</span>
+                <span className="text-xs font-bold text-amber-900 whitespace-nowrap">{fc.fullName}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Banner — hidden while searching */}
       {!isSearching && (
@@ -324,10 +344,14 @@ function ProductDetail({ product, onClose, onAdd, inCart }: { product: Product, 
             <div className="max-w-lg mx-auto w-full h-full flex flex-col overflow-hidden">
                 {/* Compact Header */}
                 <div className="relative h-40 w-full bg-[#F7F9FB] flex items-center justify-center text-7xl flex-shrink-0">
-                    <button onClick={onClose} className="absolute top-4 left-4 h-10 w-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-700 border border-gray-100">
+                    <button onClick={onClose} className="absolute top-4 left-4 h-10 w-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-700 border border-gray-100 z-10">
                         <ArrowLeft className="h-5 w-5" />
                     </button>
-                    {PRODUCT_CATEGORIES.find(c => c.name === product.category)?.icon || '📦'}
+                    {product.image_url ? (
+                        <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+                    ) : (
+                        PRODUCT_CATEGORIES.find(c => c.name === product.category)?.icon || '📦'
+                    )}
                 </div>
 
                 {/* Content Container */}
@@ -499,7 +523,11 @@ function ProductCard({ product, onAdd, inCart }: { product: Product, onAdd: (e?:
       </button>
 
       <div className="aspect-square w-full rounded-2xl bg-[#F7F9FB] flex items-center justify-center text-5xl mb-3 relative overflow-hidden">
-        {PRODUCT_CATEGORIES.find(c => c.name === product.category)?.icon || '📦'}
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+        ) : (
+          PRODUCT_CATEGORIES.find(c => c.name === product.category)?.icon || '📦'
+        )}
         {!isAvailable && (
           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
             <span className="text-[10px] font-black bg-gray-900 text-white px-2 py-1 rounded-full uppercase">Sold Out</span>

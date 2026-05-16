@@ -5,6 +5,9 @@ import App from './App.tsx';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+import { initPWABackButton } from './utils/pwaBackButton';
+
+initPWABackButton();
 
 // Register the PWA service worker
 const updateSW = registerSW({

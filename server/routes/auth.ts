@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { generateUniqueReferralCode } from '../lib/loyalty';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.get('/profile', authMiddleware, async (req: AuthRequest, res: Response) =
       .from('users')
       .select('*')
       .eq('uid', req.user?.id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     res.json(data);
@@ -23,8 +24,23 @@ router.get('/profile', authMiddleware, async (req: AuthRequest, res: Response) =
 // Register user profile after Supabase Auth signup
 router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { fullName, phoneNumber, email, place, role, creditLimit, balance, lastActive } = req.body;
+    const { fullName, phoneNumber, email, place, role, creditLimit, balance, lastActive, appliedReferralCode } = req.body;
     
+    // Generate unique referral code for new users
+    const referralCode = await generateUniqueReferralCode();
+
+    let referredBy: string | null = null;
+    if (appliedReferralCode) {
+      const { data: referrer } = await supabaseAdmin
+        .from('users')
+        .select('uid')
+        .eq('referral_code', appliedReferralCode)
+        .maybeSingle();
+      if (referrer) {
+        referredBy = referrer.uid;
+      }
+    }
+
     const { data, error } = await supabaseAdmin
       .from('users')
       .upsert({
@@ -38,10 +54,12 @@ router.post('/register-profile', authMiddleware, async (req: AuthRequest, res: R
         creditLimit: creditLimit || 500,
         balance: balance || 0,
         lastActive: lastActive || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        referral_code: referralCode,
+        referred_by: referredBy || undefined,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     res.json(data);

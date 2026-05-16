@@ -4,7 +4,7 @@ import { useDatabase } from '../hooks/useDatabase';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Lock, MapPin, Smartphone, UserPlus, LogIn } from 'lucide-react';
+import { User, Lock, MapPin, Smartphone, UserPlus, LogIn, Gift } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { UserRole } from '../types';
 
@@ -15,6 +15,7 @@ export function AuthView() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [place, setPlace] = useState('');
+  const [appliedReferral, setAppliedReferral] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { createUserProfile, getUserProfile } = useDatabase();
@@ -23,6 +24,7 @@ export function AuthView() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!navigator.onLine) return alert('Aap offline hain. Kripya internet connection check karein.');
     if (!email || !password) return alert('Email aur password bhariye');
     setLoading(true);
     try {
@@ -43,6 +45,7 @@ export function AuthView() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!navigator.onLine) return alert('Aap offline hain. Kripya internet connection check karein.');
     if (!email || !password || !fullName || !phone || !place) {
       return alert('Saari jankari bhariye');
     }
@@ -68,6 +71,7 @@ export function AuthView() {
         balance: 0,
         lastActive: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        appliedReferralCode: appliedReferral || undefined,
       };
 
       await createUserProfile(profile);
@@ -162,6 +166,15 @@ export function AuthView() {
                         className="pl-12 h-14 bg-[#F7F9FB] border-none focus:ring-2 focus:ring-[#06833E]/20 rounded-2xl font-medium"
                         required
                     />
+                    </div>
+                    <div className="relative">
+                      <Gift className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300" />
+                      <Input 
+                          placeholder="Referral Code (Optional)"
+                          value={appliedReferral}
+                          onChange={(e) => setAppliedReferral(e.target.value.toUpperCase())}
+                          className="pl-12 h-14 bg-[#F7F9FB] border-none focus:ring-2 focus:ring-[#06833E]/20 rounded-2xl font-medium tracking-widest uppercase"
+                      />
                     </div>
                 </motion.div>
                 )}

@@ -16,11 +16,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       if (loading) {
         setGlobalLoading(true);
       } else {
-        // We don't want to blindly set it to false because other buttons might be loading
-        // But for a simple app like this, it's usually fine.
-        // A better way would be a counter, but let's stick to this for now.
         setGlobalLoading(false);
       }
+      return () => {
+        setGlobalLoading(false);
+      };
     }, [loading, setGlobalLoading]);
 
     const variants = {

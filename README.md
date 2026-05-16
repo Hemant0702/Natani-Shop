@@ -18,3 +18,7 @@ View your app in AI Studio: https://ai.studio/apps/a4b6b4a7-8aa4-47fd-8f79-8e11a
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Security
+
+The Firebase config file was removed. If you need Firebase integration, add credentials to your .env file and reference them from code — never commit credential files.

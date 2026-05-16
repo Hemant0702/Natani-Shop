@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDatabase } from '../../hooks/useDatabase';
 import { useAppStore } from '../../store/useAppStore';
-import { Order } from '../../types';
+import { Order, Product, EnrichedCustomer } from '../../types';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -12,12 +12,14 @@ import { format } from 'date-fns';
 
 export function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<EnrichedCustomer[]>([]);
   const [filter, setFilter] = useState<'all' | 'new' | 'active' | 'completed'>('all');
-  const { subscribeToAllOrders, updateOrderStatus, markOrderPicked } = useDatabase();
+  const { subscribeToAllOrders, updateOrderStatus, markOrderPicked, getAllCustomers } = useDatabase();
   const [summary, setSummary] = useState({ todaySales: 0, pendingOrders: 0, totalPending: 0 });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    getAllCustomers().then(setCustomers);
     return subscribeToAllOrders((allOrders) => {
       setOrders(allOrders);
       const today = new Date().toISOString().split('T')[0];
@@ -107,6 +109,7 @@ export function AdminOrders() {
             <div key={order.id}>
               <AdminOrderCard 
                 order={order} 
+                customers={customers}
                 loading={loading}
                 onStatusUpdate={handleUpdateStatus}
                 onPick={handlePickOrder}
@@ -119,8 +122,9 @@ export function AdminOrders() {
   );
 }
 
-function AdminOrderCard({ order, onStatusUpdate, onPick, loading }: { 
+function AdminOrderCard({ order, customers, onStatusUpdate, onPick, loading }: { 
   order: Order; 
+  customers: EnrichedCustomer[];
   onStatusUpdate: (id: string, status: string) => void;
   onPick: (id: string, paymentStatus: 'collected' | 'pending') => void;
   loading: boolean;
@@ -172,7 +176,20 @@ function AdminOrderCard({ order, onStatusUpdate, onPick, loading }: {
         {/* Customer Info */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-black text-gray-900">{order.customerName}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black text-gray-900">{order.customerName}</p>
+              {(() => {
+                const customer = customers.find(c => c.uid === order.userId);
+                if (customer?.badge) {
+                  return (
+                    <span className="text-xs bg-amber-50 border border-amber-100 px-1.5 py-0.5 rounded-full" title={customer.badge.label}>
+                      {customer.badge.emoji}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Phone className="h-3 w-3 text-gray-400" />
               <span className="text-[11px] font-bold text-gray-500">{order.customerPhone}</span>

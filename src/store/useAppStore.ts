@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserProfile, OrderItem, StoreConfig, Product } from '../types';
+import { UserProfile, OrderItem, StoreConfig, Product, LoyaltyStatus } from '../types';
 
 interface AppState {
   user: UserProfile | null;
@@ -8,11 +8,13 @@ interface AppState {
   cart: OrderItem[];
   isLoading: boolean;
   globalLoading: boolean;
+  loyaltyStatus: LoyaltyStatus | null;
   
   setAuth: (user: UserProfile | null) => void;
   setStoreConfig: (config: StoreConfig | null) => void;
   setLoading: (loading: boolean) => void;
   setGlobalLoading: (loading: boolean) => void;
+  setLoyaltyStatus: (status: LoyaltyStatus | null) => void;
   
   // Cart Actions
   addToCart: (product: Product, variantLabel?: string, quantity?: number) => void;
@@ -29,11 +31,13 @@ export const useAppStore = create<AppState>()(
       cart: [],
       isLoading: true,
       globalLoading: false,
+      loyaltyStatus: null,
 
       setAuth: (user) => set({ user }),
       setStoreConfig: (config) => set({ storeConfig: config }),
       setLoading: (loading) => set({ isLoading: loading }),
       setGlobalLoading: (loading) => set({ globalLoading: loading }),
+      setLoyaltyStatus: (loyaltyStatus) => set({ loyaltyStatus }),
 
       addToCart: (product, variantLabel, quantity = 1) => set((state) => {
         const existingIndex = state.cart.findIndex(
@@ -59,7 +63,8 @@ export const useAppStore = create<AppState>()(
             productName: product.name,
             variantLabel,
             price,
-            quantity
+            quantity,
+            image_url: product.image_url
           }]
         };
       }),

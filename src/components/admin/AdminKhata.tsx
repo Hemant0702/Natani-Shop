@@ -50,9 +50,25 @@ export function AdminKhata() {
 
   // Customer-wise breakdown
   const customerBreakdown = useMemo(() => {
-    const map = new Map<string, { name: string; total: number; collected: number; pending: number; count: number }>();
+    const map = new Map<string, { 
+      name: string; 
+      total: number; 
+      collected: number; 
+      pending: number; 
+      count: number;
+      rewardPoints: number;
+    }>();
+
     salesOrders.forEach(o => {
-      const existing = map.get(o.userId) || { name: o.customerName, total: 0, collected: 0, pending: 0, count: 0 };
+      const cust = customers.find(c => c.uid === o.userId);
+      const existing = map.get(o.userId) || { 
+        name: o.customerName, 
+        total: 0, 
+        collected: 0, 
+        pending: 0, 
+        count: 0,
+        rewardPoints: cust?.rewardPoints || 0
+      };
       existing.total += o.total;
       existing.count++;
       if (o.paymentStatus === 'collected') existing.collected += o.total;
@@ -60,7 +76,7 @@ export function AdminKhata() {
       map.set(o.userId, existing);
     });
     return Array.from(map.entries()).sort((a, b) => b[1].pending - a[1].pending);
-  }, [salesOrders]);
+  }, [salesOrders, customers]);
 
   return (
     <div className="space-y-5 pb-8">
@@ -99,7 +115,10 @@ export function AdminKhata() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-gray-900">{c.name}</p>
-                    <p className="text-[10px] font-bold text-gray-500">{c.count} orders</p>
+                    <div className="flex gap-2">
+                      <p className="text-[10px] font-bold text-gray-500">{c.count} orders</p>
+                      <p className="text-[10px] font-bold text-purple-600">✨{c.rewardPoints} pts</p>
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm font-black text-red-600">{formatCurrency(c.pending)}</p>

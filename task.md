@@ -23,6 +23,12 @@
   - [x] Update all components to use API client
 - [x] 6. **UI & Features (Customer App)**
   - [x] Improve global UI aesthetics (Tailwind colors, glassmorphism, animations).
+  - [x] Fix missing `referralCode` in `LoyaltyDashboard.tsx` for legacy users by generating it lazily.
+  - [x] Fix referral display in `CartView` by fetching `referred_by`.
+  - [ ] Implement Voucher system:
+    - [ ] Create `vouchers` and `voucher_usage` tables.
+    - [ ] Backend logic to validate and apply vouchers.
+    - [ ] Frontend UI to enter and display vouchers in `CartView`.
   - [x] Update `CatalogView.tsx` with variant selection and minimum order logic.
   - [x] Update `CartView.tsx` to handle minimum orders and store open/closed states.
   - [x] Update `OrdersView.tsx` and `KhataView.tsx` (Credit limit, disputes).

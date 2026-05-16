@@ -20,6 +20,8 @@ import { Loader2, Bell, X, LogOut, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, formatCurrency } from './lib/utils';
 import { usePushNotifications } from './hooks/usePushNotifications';
+import { LoyaltyWidget } from './components/LoyaltyWidget';
+import { NotificationBell } from './components/NotificationBell';
 
 export default function App() {
   const { user, setAuth, setStoreConfig, isLoading, setLoading } = useAppStore();
@@ -100,10 +102,9 @@ export default function App() {
           <h1 className="text-xl font-extrabold text-[#06833E] tracking-tight">ApniDukan</h1>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button className="relative p-1">
-            <Bell className="h-5 w-5 text-gray-400" />
-          </button>
+        <div className="flex items-center gap-2">
+          <LoyaltyWidget />
+          <NotificationBell />
           {/* Profile Circle */}
           <button 
             onClick={() => setShowProfile(true)}

@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDatabase } from '../../hooks/useDatabase';
 import { Product } from '../../types';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { api } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { motion } from 'framer-motion';
+import imageCompression from 'browser-image-compression';
 import { Search, Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Package, Star } from 'lucide-react';
 import { PRODUCT_CATEGORIES } from '../../lib/constants';
 
@@ -313,7 +315,71 @@ function ProductModal({ product, onClose }: { product?: Product, onClose: () => 
     description: '',
     searchKeywords: [],
     englishAliases: [],
+    image_url: '',
+    image_path: '',
   });
+  
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image_url || null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImagePreview(URL.createObjectURL(file));
+    setImageFile(file);
+  };
+
+  const uploadImage = async (): Promise<{ url: string, path: string } | null> => {
+    if (!imageFile) return null;
+    
+    setIsUploading(true);
+    setUploadProgress(10);
+    
+    try {
+      const compressedFile = await imageCompression(imageFile, {
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      });
+      
+      setUploadProgress(40);
+
+      const fileExt = compressedFile.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${product?.id || 'new'}/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, compressedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+      
+      setUploadProgress(80);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      // If replacing an old image, delete it
+      if (product?.image_path) {
+        await supabase.storage.from('product-images').remove([product.image_path]);
+      }
+
+      setUploadProgress(100);
+      return { url: publicUrl, path: filePath };
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const save = async () => {
     if (!formData.name || !formData.price) return alert('Naam aur price bhariye');
@@ -336,10 +402,20 @@ function ProductModal({ product, onClose }: { product?: Product, onClose: () => 
     };
     
     try {
+      let finalData = { ...dataToSave };
+      
+      if (imageFile) {
+        const imageResult = await uploadImage();
+        if (imageResult) {
+          finalData.image_url = imageResult.url;
+          finalData.image_path = imageResult.path;
+        }
+      }
+
       if (product) {
-        await api.put(`/api/products/${product.id}`, dataToSave);
+        await api.put(`/api/products/${product.id}`, finalData);
       } else {
-        await api.post('/api/products', dataToSave);
+        await api.post('/api/products', finalData);
       }
       onClose();
     } catch (e: any) {
@@ -356,10 +432,47 @@ function ProductModal({ product, onClose }: { product?: Product, onClose: () => 
       >
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold">{product ? 'Edit Product' : 'Naya Product'}</h3>
-          <button onClick={onClose} className="p-2 text-gray-400 text-xl">×</button>
+          <button onClick={onClose} disabled={isUploading} className="p-2 text-gray-400 text-xl disabled:opacity-50">×</button>
         </div>
         
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          {/* Image Upload */}
+          <div>
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-2">Product Image</label>
+            <div className="flex items-center gap-4">
+              {imagePreview ? (
+                <div className="relative h-16 w-16 rounded-xl overflow-hidden border bg-gray-50 flex-shrink-0">
+                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                  <button
+                    onClick={() => { setImageFile(null); setImagePreview(product?.image_url || null); }}
+                    className="absolute top-0 right-0 bg-black/50 text-white p-1 rounded-bl-lg"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="h-16 w-16 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                  <Package className="h-6 w-6 text-gray-300" />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleImageChange}
+                  className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                />
+                <p className="text-[9px] text-gray-400 mt-1">Camera se photo kheinche ya gallery se select karein</p>
+              </div>
+            </div>
+            {isUploading && (
+              <div className="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-[#06833E] transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+              </div>
+            )}
+          </div>
+
           {/* Product Name + Hindi Name */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -492,8 +605,10 @@ function ProductModal({ product, onClose }: { product?: Product, onClose: () => 
         </div>
 
         <div className="flex gap-3 pt-4">
-          <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
-          <Button onClick={save} className="flex-1 bg-gray-900 border-none hover:bg-black">Save Product</Button>
+          <Button variant="outline" onClick={onClose} disabled={isUploading} className="flex-1">Cancel</Button>
+          <Button onClick={save} disabled={isUploading} className="flex-1 bg-gray-900 border-none hover:bg-black">
+            {isUploading ? 'Uploading...' : 'Save Product'}
+          </Button>
         </div>
       </motion.div>
     </div>

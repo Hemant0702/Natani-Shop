@@ -30,7 +30,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       .from('users')
       .select('role')
       .eq('uid', user.id)
-      .single();
+      .maybeSingle();
 
     req.user = {
       id: user.id,

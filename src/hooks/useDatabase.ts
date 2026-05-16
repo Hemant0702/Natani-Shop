@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import { Product, Order, KhataEntry, UserProfile, StoreConfig } from '../types';
+import { Product, Order, KhataEntry, UserProfile, StoreConfig, LoyaltyStatus, LoyaltySettings, FeaturedCustomer, EnrichedCustomer, Voucher } from '../types';
 
 export const useDatabase = () => {
   const POLLING_INTERVAL = 5000; // 5 seconds
@@ -58,9 +58,9 @@ export const useDatabase = () => {
   };
 
   // Orders
-  const placeOrder = async (order: Omit<Order, 'id'>) => {
+  const placeOrder = async (order: Omit<Order, 'id'> & { streakCouponId?: string; coinRedemptionAmount?: number; referralCode?: string; voucherCode?: string }) => {
     const data = await api.post('/api/orders', order);
-    return data.id;
+    return data;
   };
 
   const updateOrderResponse = async (orderId: string, response: 'OK' | 'Cancel Item') => {
@@ -127,24 +127,77 @@ export const useDatabase = () => {
   };
 
   const subscribeToAllKhata = (callback: (entries: KhataEntry[]) => void) => {
-    // This is a bit inefficient since we don't have a single /api/khata/all 
-    // but in practice the admin sees khata through AdminKhata which fetches customers then entries.
-    // Let's add /api/khata/all to the backend if needed, or just let the component handle it.
-    // For now, I'll use a placeholder or assume the backend has it (I should check my previous file creation).
-    // I didn't add /api/khata/all to the backend. AdminKhata currently uses orders to calculate totals.
-    // Let's add /api/khata/all to server/routes/khata.ts later if needed.
-    // Actually, AdminKhata in the existing code subscribes to all orders and processes them.
     return () => {}; 
   };
 
   // All customers
   const getAllCustomers = async () => {
     try {
-      return await api.get('/api/customers') as UserProfile[];
+      return await api.get('/api/customers') as EnrichedCustomer[];
     } catch (e) {
       return [];
     }
   };
+
+  // ─── Loyalty API ────────────────────────────────────────────────────
+  const getLoyaltyStatus = async (): Promise<LoyaltyStatus | null> => {
+    try {
+      return await api.get('/api/loyalty/my-status') as LoyaltyStatus;
+    } catch (e) {
+      console.error('Error fetching loyalty status:', e);
+      return null;
+    }
+  };
+
+  const getFeaturedCustomers = async (): Promise<FeaturedCustomer[]> => {
+    try {
+      return await api.get('/api/loyalty/featured-customers') as FeaturedCustomer[];
+    } catch (e) {
+      console.error('Error fetching featured customers:', e);
+      return [];
+    }
+  };
+
+  const getLoyaltySettings = async (): Promise<LoyaltySettings | null> => {
+    try {
+      return await api.get('/api/loyalty/settings') as LoyaltySettings;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const updateLoyaltySettings = async (settings: Partial<LoyaltySettings>) => {
+    return await api.put('/api/loyalty/settings', settings);
+  };
+
+  const redeemCoins = async (amount: number, orderId: string) => {
+    return await api.post('/api/loyalty/redeem-coins', { amount, orderId });
+  };
+
+  const applyReferral = async (referralCode: string, orderId: string, orderTotal: number) => {
+    return await api.post('/api/loyalty/apply-referral', { referralCode, orderId, orderTotal });
+  };
+
+  const getCustomerLoyaltyDetail = async (userId: string) => {
+    return await api.get(`/api/loyalty/customer/${userId}`);
+  };
+
+  const adjustCoins = async (userId: string, amount: number, note: string) => {
+    return await api.post('/api/loyalty/admin/adjust-coins', { userId, amount, note });
+  };
+
+  const getAvailableVouchers = async (): Promise<Voucher[]> => {
+    try {
+      return await api.get('/api/loyalty/vouchers/available') as Voucher[];
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const validateVoucherCode = async (code: string, orderTotal: number) => {
+    return await api.post('/api/loyalty/validate-voucher', { code, orderTotal });
+  };
+
 
   return {
     getStoreConfig,
@@ -164,5 +217,17 @@ export const useDatabase = () => {
     subscribeToAllKhata,
     flagKhataEntry,
     getAllCustomers,
+    // Loyalty
+    getLoyaltyStatus,
+    getFeaturedCustomers,
+    getLoyaltySettings,
+    updateLoyaltySettings,
+    redeemCoins,
+    applyReferral,
+    getCustomerLoyaltyDetail,
+    adjustCoins,
+    getAvailableVouchers,
+    validateVoucherCode,
   };
 };
+
